@@ -4,12 +4,46 @@
 
 { config, pkgs, ... }:
 
+
+let
+  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-23.11.tar.gz";
+in
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      (import "${home-manager}/nixos")
     ];
 
+  home-manager.users.jojo = {
+    /* The home.stateVersion option does not have a default and must be set */
+    home.stateVersion = "23.11";
+    services.kdeconnect.enable = true;
+    services.kdeconnect.indicator = true;
+  };
+  programs.firefox = {
+    enable = true;
+    preferencesStatus = "locked";
+    policies = {
+      DisablePocket = true;
+      DisableTelemetry = true;
+      DNSOverHTTPS =  {
+        enable = true;
+      };
+      ExtensionSettings = {
+	ublock = {
+	  installation_mode = "force_installed";
+	  install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+	};
+	downloader = {
+	  installation_mode = "force_installed";
+	  install_url = "https://addons.mozilla.org/firefox/downloads/latest/video-downloader-profession/latest.xpi";
+	};
+
+      };
+      # TODO Bookmarks 
+    };
+  };
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -96,15 +130,11 @@
     extraGroups = [ "networkmanager" "wheel" ];
     openssh.authorizedKeys.keys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINMUr3C7oEecTyhrhxcq4IAE03SkF2O7hpWyVGWZMEyw 2023-02-05"];
     packages = with pkgs; [
-      firefox
-      neovim
-      gitFull
       retroarchFull
       ungoogled-chromium
       vlc
       libdvdcss
       libsForQt5.kdeconnect-kde
-      tmux
       appimage-run
     ];
   };
@@ -126,8 +156,12 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
+      firefox
+      neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+      gitFull
+      tmux
+      wget
+      curl
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
