@@ -91,11 +91,20 @@
       neovim
       gitFull
       retroarchFull
-      emulationstation
       ungoogled-chromium
       vlc
       libdvdcss
+      libsForQt5.kdeconnect-kde
+      tmux
+      appimage-run
     ];
+  };
+
+  # appimage-run currently requires the fix `nix-shell -p 'appimage-run.override { extraPkgs = pkgs: [ pkgs.libthai ]; }' --run "appimage-run ./${TAURI-APP}.AppImage" `
+  nixpkgs.config.packageOverrides = pkgs: rec {
+    custom-run = pkgs.appimage-run.override {
+      extraPkgs = pkgs: [ pkgs.libthai ];
+    };
   };
 
   # Enable automatic login for the user.
