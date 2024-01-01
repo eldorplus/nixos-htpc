@@ -42,6 +42,14 @@
     LC_TIME = "de_DE.UTF-8";
   };
 
+  # Disable power management (prevent sleeping)
+  powerManagement.enable = false;
+  systemd.targets.sleep.enable = false;
+  systemd.targets.suspend.enable = false;
+  systemd.targets.hibernate.enable = false;
+  systemd.targets.hybrid-sleep.enable = false;
+
+
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
@@ -86,6 +94,7 @@
     isNormalUser = true;
     description = "jojo";
     extraGroups = [ "networkmanager" "wheel" ];
+    openssh.authorizedKeys.keys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINMUr3C7oEecTyhrhxcq4IAE03SkF2O7hpWyVGWZMEyw 2023-02-05"];
     packages = with pkgs; [
       firefox
       neovim
@@ -132,7 +141,12 @@
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    settings.PasswordAuthentication = false;
+    settings.KbdInteractiveAuthentication = false;
+    settings.PubkeyAuthentication = true;
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
